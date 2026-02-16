@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מכונות תספורת - מערכת ניהול</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { Camera, Scissors, DollarSign, Package, Plus, Edit2, Trash2, Search, Filter, X, Check } = lucide;
+
+        const API_BASE_URL = 'http://localhost:8080/api/machines';
+
+        const BarbershopMachines = () => {
+          const [machines, setMachines] = useState([]);
+          const [filteredMachines, setFilteredMachines] = useState([]);
+          const [loading, setLoading] = useState(true);
+          const [searchTerm, setSearchTerm] = useState('');
+          const [filterAvailable, setFilterAvailable] = useState('all');
+          const [showModal, setShowModal] = useState(false);
+          const [editingMachine, setEditingMachine] = useState(null);
+          const [formData, setFormData] = useState({
+            brand: '',
+            model: '',
+            price: '',
+            available: true,
+            description: '',
+            imageUrl: ''
+          });
+
+          useEffect(() => {
+            fetchMachines();
+          }, []);
+
+          useEffect(() => {
+            filterMachines();
+          }, [machines, searchTerm, filterAvailable]);
+
+          const fetchMachines = async () => {
+            try {
+              setLoading(true);
+              const response = await fetch(`${API_BASE_URL}/all`);
+              const data = await response.json();
+              setMachines(data);
+            } catch (error) {
+              console.error('Error fetching machines:', error);
+            } finally {
+              setLoading(false);
+            }
+          };
+
+          const filterMachines = () => {
+            let filtered = machines;
+
+            if (searchTerm) {
+              filtered = filtered.filter(machine =>
+                machine.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                machine.model.toLowerCase().includes(searchTerm.toLowerCase())
+              );
+            }
+
+            if (filterAvailable !== 'all') {
+              const isAvailable = filterAvailable === 'available';
+              filtered = filtered.filter(machine => machine.available === isAvailable);
+            }
+
+            setFilteredMachines(filtered);
+          };
+
+          const handleSubmit = async (e) => {
+            e.preventDefault();
+            
+            try {
+              const url = editingMachine 
+                ? `${API_BASE_URL}/${editingMachine.id}`
+                : API_BASE_URL;
+              
+              const method = editingMachine ? 'PUT' : 'POST';
+              
+              const response = await fetch(url, {
+                method: method,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  ...formData,
+                  price: parseFloat(formData.price)
+                }),
+              });
+
+              if (response.ok) {
+                fetchMachines();
+                closeModal();
+              }
+            } catch (error) {
+              console.error('Error saving machine:', error);
+            }
+          };
+
+          const handleDelete = async (id) => {
+            if (window.confirm('האם אתה בטוח שברצונך למחוק מכונה זו?')) {
+              try {
+                const response = await fetch(`${API_BASE_URL}/${id}`, {
+                  method: 'DELETE',
+                });
+                
+                if (response.ok) {
+                  fetchMachines();
+                }
+              } catch (error) {
+                console.error('Error deleting machine:', error);
+              }
+            }
+          };
+
+          const openModal = (machine = null) => {
+            if (machine) {
+              setEditingMachine(machine);
+              setFormData({
+                brand: machine.brand,
+                model: machine.model,
+                price: machine.price.toString(),
+                available: machine.available,
+                description: machine.description || '',
+                imageUrl: machine.imageUrl || ''
+              });
+            } else {
+              setEditingMachine(null);
+              setFormData({
+                brand: '',
+                model: '',
+                price: '',
+                available: true,
+                description: '',
+                imageUrl: ''
+              });
+            }
+            setShowModal(true);
+          };
+
+          const closeModal = () => {
+            setShowModal(false);
+            setEditingMachine(null);
+          };
+
+          return (
+            <div style={{
+              minHeight: '100vh',
+              background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)',
+              fontFamily: "'Bebas Neue', 'Arial Black', sans-serif",
+              color: '#fff',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: `
+                  repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.02) 35px, rgba(255,255,255,.02) 70px),
+                  repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,255,255,.02) 35px, rgba(255,255,255,.02) 70px)
+                `,
+                opacity: 0.3,
+                pointerEvents: 'none'
+              }} />
+
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: '10%',
+                width: '3px',
+                height: '100%',
+                background: 'linear-gradient(180deg, #ff0000, #cc0000)',
+                opacity: 0.6,
+                animation: 'pulse 3s ease-in-out infinite'
+              }} />
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                right: '15%',
+                width: '2px',
+                height: '100%',
+                background: 'linear-gradient(180deg, #ff0000, #cc0000)',
+                opacity: 0.4,
+                animation: 'pulse 4s ease-in-out infinite'
+              }} />
+
+              <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;600;700&display=swap');
+                
+                @keyframes pulse {
+                  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+                  50% { opacity: 0.6; transform: scaleY(1.02); }
+                }
+                
+                @keyframes slideInRight {
+                  from {
+                    opacity: 0;
+                    transform: translateX(50px);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateX(0);
+                  }
+                }
+                
+                @keyframes fadeInUp {
+                  from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateY(0);
+                  }
+                }
+                
+                @keyframes spin {
+                  from { transform: rotate(0deg); }
+                  to { transform: rotate(360deg); }
+                }
+                
+                .card-hover {
+                  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                
+                .card-hover:hover {
+                  transform: translateY(-8px) scale(1.02);
+                  box-shadow: 0 20px 40px rgba(255, 0, 0, 0.2), 0 0 30px rgba(255, 0, 0, 0.1);
+                }
+                
+                .btn-primary {
+                  background: linear-gradient(135deg, #ff0000, #cc0000);
+                  border: none;
+                  color: white;
+                  padding: 12px 28px;
+                  font-family: 'Bebas Neue', sans-serif;
+                  font-size: 18px;
+                  letter-spacing: 1.5px;
+                  cursor: pointer;
+                  transition: all 0.3s ease;
+                  position: relative;
+                  overflow: hidden;
+                }
+                
+                .btn-primary::before {
+                  content: '';
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  width: 0;
+                  height: 0;
+                  border-radius: 50%;
+                  background: rgba(255, 255, 255, 0.2);
+                  transform: translate(-50%, -50%);
+                  transition: width 0.6s, height 0.6s;
+                }
+                
+                .btn-primary:hover::before {
+                  width: 300px;
+                  height: 300px;
+                }
+                
+                .btn-primary:hover {
+                  transform: scale(1.05);
+                  box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
+                }
+                
+                .input-field {
+                  background: rgba(255, 255, 255, 0.05);
+                  border: 2px solid rgba(255, 255, 255, 0.1);
+                  border-radius: 8px;
+                  padding: 12px 16px;
+                  color: #fff;
+                  font-family: 'Rajdhani', sans-serif;
+                  font-size: 16px;
+                  transition: all 0.3s ease;
+                  width: 100%;
+                }
+                
+                .input-field:focus {
+                  outline: none;
+                  border-color: #ff0000;
+                  background: rgba(255, 255, 255, 0.08);
+                  box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+                }
+                
+                .input-field::placeholder {
+                  color: rgba(255, 255, 255, 0.4);
+                }
+                
+                .modal-backdrop {
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  right: 0;
+                  bottom: 0;
+                  background: rgba(0, 0, 0, 0.85);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  z-index: 1000;
+                  animation: fadeIn 0.3s ease;
+                }
+                
+                @keyframes fadeIn {
+                  from { opacity: 0; }
+                  to { opacity: 1; }
+                }
+                
+                .modal-content {
+                  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                  border: 2px solid rgba(255, 0, 0, 0.3);
+                  border-radius: 16px;
+                  padding: 32px;
+                  max-width: 600px;
+                  width: 90%;
+                  max-height: 90vh;
+                  overflow-y: auto;
+                  position: relative;
+                  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                
+                @keyframes slideInUp {
+                  from {
+                    opacity: 0;
+                    transform: translateY(50px) scale(0.9);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                  }
+                }
+                
+                .badge {
+                  display: inline-block;
+                  padding: 6px 16px;
+                  border-radius: 20px;
+                  font-family: 'Rajdhani', sans-serif;
+                  font-weight: 600;
+                  font-size: 14px;
+                  letter-spacing: 0.5px;
+                }
+                
+                .badge-available {
+                  background: rgba(0, 255, 136, 0.15);
+                  color: #00ff88;
+                  border: 1px solid rgba(0, 255, 136, 0.3);
+                }
+                
+                .badge-unavailable {
+                  background: rgba(255, 68, 68, 0.15);
+                  color: #ff4444;
+                  border: 1px solid rgba(255, 68, 68, 0.3);
+                }
+              `}</style>
+
+              <div style={{ position: 'relative', zIndex: 1, padding: '40px 20px' }}>
+                <div style={{
+                  maxWidth: '1400px',
+                  margin: '0 auto 40px',
+                  animation: 'fadeInUp 0.6s ease'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '20px',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div style={{
+                        background: 'linear-gradient(135deg, #ff0000, #cc0000)',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 8px 24px rgba(255, 0, 0, 0.3)'
+                      }}>
+                        <Scissors size={36} style={{ animation: 'spin 20s linear infinite' }} />
+                      </div>
+                      <div>
+                        <h1 style={{
+                          fontSize: '52px',
+                          margin: 0,
+                          letterSpacing: '3px',
+                          textTransform: 'uppercase',
+                          background: 'linear-gradient(135deg, #fff, #ff0000)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent'
+                        }}>
+                          מכונות תספורת
+                        </h1>
+                        <p style={{
+                          margin: '4px 0 0',
+                          fontSize: '16px',
+                          fontFamily: 'Rajdhani, sans-serif',
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          letterSpacing: '1px'
+                        }}>
+                          מערכת ניהול מקצועית
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => openModal()}
+                      className="btn-primary"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        borderRadius: '8px'
+                      }}
+                    >
+                      <Plus size={20} />
+                      <span style={{ position: 'relative', zIndex: 1 }}>הוסף מכונה</span>
+                    </button>
+                  </div>
+
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    padding: '24px',
+                    display: 'flex',
+                    gap: '16px',
+                    flexWrap: 'wrap',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <div style={{ flex: '1 1 300px', position: 'relative' }}>
+                      <Search size={20} style={{
+                        position: 'absolute',
+                        left: '16px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: 'rgba(255, 255, 255, 0.4)'
+                      }} />
+                      <input
+                        type="text"
+                        placeholder="חפש לפי מותג או דגם..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="input-field"
+                        style={{ paddingLeft: '48px' }}
+                      />
+                    </div>
+                    
+                    <div style={{ position: 'relative' }}>
+                      <Filter size={20} style={{
+                        position: 'absolute',
+                        left: '16px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: 'rgba(255, 255, 255, 0.4)'
+                      }} />
+                      <select
+                        value={filterAvailable}
+                        onChange={(e) => setFilterAvailable(e.target.value)}
+                        className="input-field"
+                        style={{
+                          paddingLeft: '48px',
+                          minWidth: '200px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="all">כל המכונות</option>
+                        <option value="available">זמינות</option>
+                        <option value="unavailable">לא זמינות</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {loading ? (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '400px'
+                  }}>
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      border: '4px solid rgba(255, 255, 255, 0.1)',
+                      borderTop: '4px solid #ff0000',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                  </div>
+                ) : (
+                  <div style={{
+                    maxWidth: '1400px',
+                    margin: '0 auto',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                    gap: '24px'
+                  }}>
+                    {filteredMachines.map((machine, index) => (
+                      <div
+                        key={machine.id}
+                        className="card-hover"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderRadius: '16px',
+                          overflow: 'hidden',
+                          position: 'relative',
+                          animation: `fadeInUp 0.6s ease ${index * 0.1}s both`
+                        }}
+                      >
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          width: '80px',
+                          height: '80px',
+                          background: 'linear-gradient(135deg, #ff0000, transparent)',
+                          opacity: 0.2,
+                          borderBottomLeftRadius: '100%'
+                        }} />
+
+                        <div style={{
+                          height: '200px',
+                          background: machine.imageUrl
+                            ? `url(${machine.imageUrl})`
+                            : 'linear-gradient(135deg, rgba(255, 0, 0, 0.1) 0%, rgba(255, 0, 0, 0.05) 100%)',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderBottom: '2px solid rgba(255, 0, 0, 0.2)'
+                        }}>
+                          {!machine.imageUrl && (
+                            <Camera size={48} style={{ color: 'rgba(255, 255, 255, 0.2)' }} />
+                          )}
+                        </div>
+
+                        <div style={{ padding: '24px' }}>
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'start',
+                            marginBottom: '12px'
+                          }}>
+                            <div>
+                              <h3 style={{
+                                fontSize: '28px',
+                                margin: '0 0 4px 0',
+                                letterSpacing: '1px',
+                                color: '#fff'
+                              }}>
+                                {machine.brand}
+                              </h3>
+                              <p style={{
+                                fontSize: '16px',
+                                margin: 0,
+                                fontFamily: 'Rajdhani, sans-serif',
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                fontWeight: 300
+                              }}>
+                                דגם: {machine.model}
+                              </p>
+                            </div>
+                            <span className={machine.available ? 'badge-available' : 'badge-unavailable'} style={{ whiteSpace: 'nowrap' }}>
+                              {machine.available ? '✓ זמין' : '✕ לא זמין'}
+                            </span>
+                          </div>
+
+                          {machine.description && (
+                            <p style={{
+                              fontSize: '14px',
+                              fontFamily: 'Rajdhani, sans-serif',
+                              color: 'rgba(255, 255, 255, 0.5)',
+                              marginBottom: '16px',
+                              lineHeight: '1.6'
+                            }}>
+                              {machine.description}
+                            </p>
+                          )}
+
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            marginBottom: '20px',
+                            padding: '12px',
+                            background: 'rgba(255, 0, 0, 0.08)',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255, 0, 0, 0.2)'
+                          }}>
+                            <DollarSign size={20} style={{ color: '#ff0000' }} />
+                            <span style={{
+                              fontSize: '24px',
+                              fontWeight: 'bold',
+                              fontFamily: 'Rajdhani, sans-serif',
+                              color: '#ff0000'
+                            }}>
+                              ₪{machine.price.toFixed(2)}
+                            </span>
+                          </div>
+
+                          <div style={{
+                            display: 'flex',
+                            gap: '8px'
+                          }}>
+                            <button
+                              onClick={() => openModal(machine)}
+                              style={{
+                                flex: 1,
+                                padding: '10px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                fontFamily: 'Rajdhani, sans-serif',
+                                fontSize: '16px',
+                                transition: 'all 0.3s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                                e.currentTarget.style.borderColor = '#ff0000';
+                              }}
+                              onMouseOut={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                              }}
+                            >
+                              <Edit2 size={16} />
+                              <span>ערוך</span>
+                            </button>
+                            
+                            <button
+                              onClick={() => handleDelete(machine.id)}
+                              style={{
+                                padding: '10px',
+                                background: 'rgba(255, 0, 0, 0.1)',
+                                border: '1px solid rgba(255, 0, 0, 0.3)',
+                                borderRadius: '8px',
+                                color: '#ff4444',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.3s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 0, 0, 0.2)';
+                                e.currentTarget.style.borderColor = '#ff0000';
+                              }}
+                              onMouseOut={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 0, 0, 0.1)';
+                                e.currentTarget.style.borderColor = 'rgba(255, 0, 0, 0.3)';
+                              }}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {!loading && filteredMachines.length === 0 && (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '60px 20px',
+                    color: 'rgba(255, 255, 255, 0.4)'
+                  }}>
+                    <Package size={64} style={{ marginBottom: '20px', opacity: 0.3 }} />
+                    <p style={{
+                      fontSize: '24px',
+                      fontFamily: 'Rajdhani, sans-serif',
+                      margin: 0
+                    }}>
+                      לא נמצאו מכונות
+                    </p>
+                  </div>
+                )}
+
+                {showModal && (
+                  <div className="modal-backdrop" onClick={closeModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={closeModal}
+                        style={{
+                          position: 'absolute',
+                          top: '16px',
+                          right: '16px',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: 'none',
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          color: '#fff',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 0, 0, 0.3)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                        }}
+                      >
+                        <X size={20} />
+                      </button>
+
+                      <h2 style={{
+                        fontSize: '36px',
+                        margin: '0 0 24px 0',
+                        letterSpacing: '2px',
+                        textAlign: 'center',
+                        background: 'linear-gradient(135deg, #fff, #ff0000)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      }}>
+                        {editingMachine ? 'ערוך מכונה' : 'הוסף מכונה חדשה'}
+                      </h2>
+
+                      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '14px',
+                            fontFamily: 'Rajdhani, sans-serif',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            letterSpacing: '1px'
+                          }}>
+                            מותג *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            minLength={3}
+                            maxLength={30}
+                            value={formData.brand}
+                            onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                            className="input-field"
+                            placeholder="לדוגמה: Wahl, Andis"
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '14px',
+                            fontFamily: 'Rajdhani, sans-serif',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            letterSpacing: '1px'
+                          }}>
+                            דגם *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.model}
+                            onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                            className="input-field"
+                            placeholder="לדוגמה: Magic Clip"
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '14px',
+                            fontFamily: 'Rajdhani, sans-serif',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            letterSpacing: '1px'
+                          }}>
+                            מחיר (₪) *
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            min={100}
+                            max={2000}
+                            step="0.01"
+                            value={formData.price}
+                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                            className="input-field"
+                            placeholder="100 - 2000"
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            cursor: 'pointer',
+                            padding: '12px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            borderRadius: '8px',
+                            border: '2px solid rgba(255, 255, 255, 0.1)',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255, 0, 0, 0.3)';
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                          }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.available}
+                              onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                              style={{
+                                width: '20px',
+                                height: '20px',
+                                cursor: 'pointer',
+                                accentColor: '#ff0000'
+                              }}
+                            />
+                            <span style={{
+                              fontSize: '16px',
+                              fontFamily: 'Rajdhani, sans-serif',
+                              color: '#fff'
+                            }}>
+                              המכונה זמינה
+                            </span>
+                          </label>
+                        </div>
+
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '14px',
+                            fontFamily: 'Rajdhani, sans-serif',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            letterSpacing: '1px'
+                          }}>
+                            תיאור
+                          </label>
+                          <textarea
+                            maxLength={500}
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            className="input-field"
+                            placeholder="תיאור אופציונלי של המכונה..."
+                            rows={4}
+                            style={{ resize: 'vertical' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '14px',
+                            fontFamily: 'Rajdhani, sans-serif',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            letterSpacing: '1px'
+                          }}>
+                            קישור לתמונה
+                          </label>
+                          <input
+                            type="url"
+                            value={formData.imageUrl}
+                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                            className="input-field"
+                            placeholder="https://example.com/image.jpg"
+                          />
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          gap: '12px',
+                          marginTop: '8px'
+                        }}>
+                          <button
+                            type="submit"
+                            className="btn-primary"
+                            style={{
+                              flex: 1,
+                              borderRadius: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '10px'
+                            }}
+                          >
+                            <Check size={20} />
+                            <span style={{ position: 'relative', zIndex: 1 }}>
+                              {editingMachine ? 'עדכן' : 'הוסף'}
+                            </span>
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={closeModal}
+                            style={{
+                              flex: 1,
+                              padding: '12px 28px',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              border: '2px solid rgba(255, 255, 255, 0.2)',
+                              borderRadius: '8px',
+                              color: '#fff',
+                              fontFamily: 'Bebas Neue, sans-serif',
+                              fontSize: '18px',
+                              letterSpacing: '1.5px',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                            }}
+                          >
+                            ביטול
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<BarbershopMachines />);
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

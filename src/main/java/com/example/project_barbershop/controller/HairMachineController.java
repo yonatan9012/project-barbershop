@@ -28,7 +28,7 @@ public class HairMachineController {
 
         @PostMapping
         public ResponseEntity<?> insertMachine(@RequestBody HairMachineIn machineIn) {
-            HairMachine machine = machineIn.toHairMachine();
+            HairMachine machine = machineIn.toHairMachine(machineIn);
             machine = hairMachineService.save(machine);
             return new ResponseEntity<>(machine, HttpStatus.OK);
         }

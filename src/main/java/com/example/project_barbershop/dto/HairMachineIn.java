@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 public class HairMachineIn implements Serializable {
@@ -14,8 +15,7 @@ public class HairMachineIn implements Serializable {
     @Length(min = 3, max = 30)
     private String brand;
 
-    @Min(3)
-    @Max(20)
+    @Size(min = 3, max = 20)
     private String model;
 
     @Min(100)
@@ -28,7 +28,7 @@ public class HairMachineIn implements Serializable {
     @Length(max = 500)
     private String description;
 
-    @Max(100)
+
     private String imageUrl;
 
     public String getBrand() {

@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Entity
@@ -22,8 +23,7 @@ public class HairMachine implements Serializable {
     @Length(min = 3, max = 30)
     private String brand;
 
-    @Min(3)
-    @Max(20)
+    @Size(min = 3, max = 20)
     private String model;
 
     @Min(100)
@@ -36,7 +36,7 @@ public class HairMachine implements Serializable {
     @Length(max = 500)
     private String description;
 
-    @Max(100)
+
     private String imageUrl;
 
     public Long getId() {
@@ -47,51 +47,51 @@ public class HairMachine implements Serializable {
         this.id = id;
     }
 
-    public @NotBlank @Length(min = 3, max = 30) String getBrand() {
+    public String getBrand() {
         return brand;
     }
 
-    public void setBrand(@NotBlank @Length(min = 3, max = 30) String brand) {
+    public void setBrand(String brand) {
         this.brand = brand;
     }
 
-    public @Min(3) @Max(20) String getModel() {
+    public String getModel() {
         return model;
     }
 
-    public void setModel(@Min(3) @Max(20) String model) {
+    public void setModel(String model) {
         this.model = model;
     }
 
-    public @Min(100) @Max(2000) Double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(@Min(100) @Max(2000) Double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public @NotBlank Boolean getAvailable() {
+    public Boolean getAvailable() {
         return available;
     }
 
-    public void setAvailable(@NotBlank Boolean available) {
+    public void setAvailable(Boolean available) {
         this.available = available;
     }
 
-    public @Length(max = 500) String getDescription() {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(@Length(max = 500) String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public @Max(100) String getImageUrl() {
+    public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(@Max(100) String imageUrl) {
+    public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
