@@ -19,7 +19,7 @@ public class HairMachineIn implements Serializable {
 
     @Min(100)
     @Max(2000)
-    private Double price;
+    private Double pric;
 
     @NotNull
     private Boolean available;
