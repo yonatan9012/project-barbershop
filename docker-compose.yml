@@ -2,7 +2,7 @@ version: "3"
 services:
   appserver:
     container_name: server
-    image: project
+    image: yonatanovadia/project-barbershop:project-barbershop-001
     ports:
       - 8081:8081
     depends_on:
@@ -15,4 +15,4 @@ services:
       - 5432:5432
     volumes:
       - ./postgresdata:/var/lib/postgresql/
-    privileged: true
+    privileged: tru
