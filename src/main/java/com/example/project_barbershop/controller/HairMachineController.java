@@ -83,7 +83,7 @@ public class HairMachineController {
 
             return new ResponseEntity<>(
                     hairMachineService.findByBrandAndAvailable(brand, available),
-                    HttpStatus.O
+                    HttpStatus.OK
             );
         }
 }
