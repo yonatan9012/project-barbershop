@@ -15,4 +15,4 @@ services:
       - 5432:5432
     volumes:
       - ./postgresdata:/var/lib/postgresql/
-    privileged: tru
+    privileged: true
