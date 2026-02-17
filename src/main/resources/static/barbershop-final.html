@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✂️ מכונות תספורת</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap');
+
+        :root {
+            --red: #e63946;
+            --red-dark: #c1121f;
+            --red-glow: rgba(230, 57, 70, 0.3);
+            --bg: #0d0d0d;
+            --bg2: #141414;
+            --bg3: #1c1c1c;
+            --border: rgba(255,255,255,0.08);
+            --text: #f0f0f0;
+            --text-dim: rgba(255,255,255,0.45);
+            --green: #2dc653;
+            --green-bg: rgba(45,198,83,0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(13,13,13,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 64px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--red);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 0 16px var(--red-glow);
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-sub {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        .btn-add {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--red);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Heebo', sans-serif;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px var(--red-glow);
+        }
+
+        .btn-add:hover {
+            background: var(--red-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--red-glow);
+        }
+
+        /* ── MAIN ── */
+        .main {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* ── STATS ── */
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 24px;
+            flex: 1;
+        }
+
+        .stat-num {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--red);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        /* ── FILTERS ── */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 220px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 16px 11px 42px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'Heebo', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px var(--red-glow);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            right: auto;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .filter-select {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 16px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'Heebo', sans-serif;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            min-width: 160px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--red);
+        }
+
+        /* ── GRID ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(230,57,70,0.4);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            background: var(--bg3);
+        }
+
+        .card-img-placeholder {
+            width: 100%;
+            height: 200px;
+            background: var(--bg3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .card-brand {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .card-model {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-yes {
+            background: var(--green-bg);
+            color: var(--green);
+            border: 1px solid rgba(45,198,83,0.3);
+        }
+
+        .badge-no {
+            background: rgba(230,57,70,0.12);
+            color: var(--red);
+            border: 1px solid rgba(230,57,70,0.3);
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .card-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--red);
+            margin-bottom: 16px;
+        }
+
+        .card-price span {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-dim);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit {
+            flex: 1;
+            padding: 9px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Heebo', sans-serif;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .btn-del {
+            padding: 9px 14px;
+            background: rgba(230,57,70,0.1);
+            border: 1px solid rgba(230,57,70,0.25);
+            border-radius: 8px;
+            color: var(--red);
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-del:hover {
+            background: rgba(230,57,70,0.22);
+        }
+
+        /* ── EMPTY / LOADING ── */
+        .center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            color: var(--text-dim);
+            gap: 16px;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(255,255,255,0.08);
+            border-top-color: var(--red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-icon { font-size: 48px; opacity: 0.3; }
+        .empty-text { font-size: 16px; }
+
+        /* ── MODAL ── */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .overlay.open { display: flex; }
+
+        .modal {
+            background: var(--bg2);
+            border: 1px solid rgba(230,57,70,0.3);
+            border-radius: 20px;
+            padding: 32px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.88) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255,255,255,0.06);
+            border: none;
+            color: var(--text-dim);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(230,57,70,0.2);
+            color: var(--red);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'Heebo', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px var(--red-glow);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255,255,255,0.2);
+        }
+
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            grid-column: 1 / -1;
+        }
+
+        .toggle-row:hover { border-color: var(--red); }
+
+        .toggle-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--red);
+            cursor: pointer;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .form-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 12px;
+            background: var(--red);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Heebo', sans-serif;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 4px 16px var(--red-glow);
+        }
+
+        .btn-submit:hover {
+            background: var(--red-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Heebo', sans-serif;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+        }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 999;
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-color: var(--green); color: var(--green); }
+        .toast.error   { border-color: var(--red);   color: var(--red);   }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 600px) {
+            .topbar { padding: 0 16px; }
+            .main { padding: 20px 16px; }
+            .stats { flex-wrap: wrap; }
+            .form-grid { grid-template-columns: 1fr; }
+            .modal { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+    <div class="logo">
+        <div class="logo-icon">✂️</div>
+        <div>
+            <div class="logo-text">מכונות תספורת</div>
+            <div class="logo-sub">מערכת ניהול</div>
+        </div>
+    </div>
+    <button class="btn-add" onclick="openModal()">
+        + הוסף מכונה
+    </button>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+    <!-- STATS -->
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-num" id="statTotal">—</div>
+            <div class="stat-label">סה"כ מכונות</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" id="statAvailable">—</div>
+            <div class="stat-label">זמינות</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" id="statUnavailable">—</div>
+            <div class="stat-label">לא זמינות</div>
+        </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+        <div class="search-box">
+            <input type="text" id="search" placeholder="חיפוש לפי מותג או דגם..." oninput="applyFilters()">
+        </div>
+        <select class="filter-select" id="filterAvail" onchange="applyFilters()">
+            <option value="all">כל הסטטוסים</option>
+            <option value="true">זמינות בלבד</option>
+            <option value="false">לא זמינות בלבד</option>
+        </select>
+        <select class="filter-select" id="filterSort" onchange="applyFilters()">
+            <option value="default">מיון: ברירת מחדל</option>
+            <option value="price-asc">מחיר: נמוך לגבוה</option>
+            <option value="price-desc">מחיר: גבוה לנמוך</option>
+            <option value="brand">מותג: א-ת</option>
+        </select>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content">
+        <div class="center"><div class="spinner"></div></div>
+    </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-title" id="modalTitle">הוסף מכונה חדשה</div>
+
+        <form id="machineForm" onsubmit="submitForm(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>מותג *</label>
+                    <input type="text" id="fBrand" placeholder="Wahl, Andis, JRL..." required maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label>דגם *</label>
+                    <input type="text" id="fModel" placeholder="Magic Clip..." required maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>מחיר (₪) *</label>
+                    <input type="number" id="fPrice" placeholder="100 - 2000" required min="100" max="2000" step="any">
+                </div>
+                <label class="toggle-row">
+                    <input type="checkbox" id="fAvailable" checked>
+                    <span class="toggle-label">מכונה זמינה</span>
+                </label>
+                <div class="form-group full">
+                    <label>תיאור</label>
+                    <textarea id="fDesc" placeholder="תיאור קצר של המכונה..." maxlength="500"></textarea>
+                </div>
+                <div class="form-group full">
+                    <label>קישור לתמונה</label>
+                    <input type="text" id="fImage" placeholder="https://...">
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn-submit" id="submitBtn">שמור</button>
+                <button type="button" class="btn-cancel" onclick="closeModal()">ביטול</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const API = 'http://localhost:8081/api/machines';
+    let allMachines = [];
+    let editId = null;
+
+    // ── FETCH ──
+    async function load() {
+        try {
+            const res = await fetch(`${API}/all`);
+            if (!res.ok) throw new Error(res.status);
+            allMachines = await res.json();
+            updateStats();
+            applyFilters();
+        } catch (e) {
+            document.getElementById('content').innerHTML = `
+                <div class="center">
+                    <div class="empty-icon">⚠️</div>
+                    <div class="empty-text">לא ניתן להתחבר לשרת (${e.message})</div>
+                </div>`;
+        }
+    }
+
+    // ── STATS ──
+    function updateStats() {
+        const avail = allMachines.filter(m => m.available).length;
+        document.getElementById('statTotal').textContent = allMachines.length;
+        document.getElementById('statAvailable').textContent = avail;
+        document.getElementById('statUnavailable').textContent = allMachines.length - avail;
+    }
+
+    // ── FILTERS ──
+    function applyFilters() {
+        const q     = document.getElementById('search').value.trim().toLowerCase();
+        const avail = document.getElementById('filterAvail').value;
+        const sort  = document.getElementById('filterSort').value;
+
+        let list = [...allMachines];
+
+        if (q)          list = list.filter(m =>
+            m.brand.toLowerCase().includes(q) ||
+            m.model.toLowerCase().includes(q)
+        );
+        if (avail !== 'all') list = list.filter(m => String(m.available) === avail);
+
+        if (sort === 'price-asc')  list.sort((a,b) => a.price - b.price);
+        if (sort === 'price-desc') list.sort((a,b) => b.price - a.price);
+        if (sort === 'brand')      list.sort((a,b) => a.brand.localeCompare(b.brand));
+
+        renderGrid(list);
+    }
+
+    // ── RENDER ──
+    function renderGrid(machines) {
+        const el = document.getElementById('content');
+
+        if (machines.length === 0) {
+            el.innerHTML = `
+                <div class="center">
+                    <div class="empty-icon">📦</div>
+                    <div class="empty-text">לא נמצאו מכונות</div>
+                </div>`;
+            return;
+        }
+
+        el.innerHTML = `<div class="grid">${machines.map((m, i) => cardHTML(m, i)).join('')}</div>`;
+    }
+
+    function cardHTML(m, i) {
+        const img = m.imageUrl
+            ? `<img class="card-img" src="${m.imageUrl}" onerror="this.outerHTML='<div class=\\'card-img-placeholder\\'>✂️</div>'" alt="${m.brand}">`
+            : `<div class="card-img-placeholder">✂️</div>`;
+
+        const badge = m.available
+            ? `<span class="badge badge-yes">✓ זמין</span>`
+            : `<span class="badge badge-no">✕ לא זמין</span>`;
+
+        const desc = m.description
+            ? `<p class="card-desc">${m.description}</p>`
+            : '';
+
+        return `
+        <div class="card" style="animation-delay:${i*0.06}s">
+            ${img}
+            <div class="card-body">
+                <div class="card-top">
+                    <div>
+                        <div class="card-brand">${m.brand}</div>
+                        <div class="card-model">${m.model}</div>
+                    </div>
+                    ${badge}
+                </div>
+                ${desc}
+                <div class="card-price">₪${Number(m.price).toLocaleString()} <span>מחיר</span></div>
+                <div class="card-actions">
+                    <button class="btn-edit" onclick="openModal(${m.id})">✏️ ערוך</button>
+                    <button class="btn-del"  onclick="deleteMachine(${m.id})">🗑️</button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // ── MODAL ──
+    function openModal(id = null) {
+        editId = id;
+        document.getElementById('machineForm').reset();
+        document.getElementById('fAvailable').checked = true;
+
+        if (id) {
+            const m = allMachines.find(x => x.id === id);
+            if (!m) return;
+            document.getElementById('modalTitle').textContent = 'עריכת מכונה';
+            document.getElementById('submitBtn').textContent  = 'עדכן';
+            document.getElementById('fBrand').value     = m.brand     || '';
+            document.getElementById('fModel').value     = m.model     || '';
+            document.getElementById('fPrice').value     = m.price     || '';
+            document.getElementById('fAvailable').checked = m.available;
+            document.getElementById('fDesc').value      = m.description || '';
+            document.getElementById('fImage').value     = m.imageUrl  || '';
+        } else {
+            document.getElementById('modalTitle').textContent = 'הוסף מכונה חדשה';
+            document.getElementById('submitBtn').textContent  = 'שמור';
+        }
+
+        document.getElementById('overlay').classList.add('open');
+        document.getElementById('fBrand').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('overlay').classList.remove('open');
+        editId = null;
+    }
+
+    function overlayClick(e) {
+        if (e.target.id === 'overlay') closeModal();
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // ── SUBMIT ──
+    async function submitForm(e) {
+        e.preventDefault();
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'שומר...';
+
+        const body = {
+            brand:       document.getElementById('fBrand').value.trim(),
+            model:       document.getElementById('fModel').value.trim(),
+            price:       parseFloat(document.getElementById('fPrice').value),
+            available:   document.getElementById('fAvailable').checked,
+            description: document.getElementById('fDesc').value.trim(),
+            imageUrl:    document.getElementById('fImage').value.trim()
+        };
+
+        const url    = editId ? `${API}/${editId}` : API;
+        const method = editId ? 'PUT' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                const err = await res.text();
+                console.error('Server error:', err);
+                throw new Error(`${res.status}: ${err}`);
+            }
+
+            closeModal();
+            await load();
+            showToast(editId ? '✓ המכונה עודכנה' : '✓ המכונה נוספה', 'success');
+
+        } catch (err) {
+            console.error('Submit error:', err);
+            showToast('שגיאה בשמירה: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = editId ? 'עדכן' : 'שמור';
+        }
+    }
+
+    // ── DELETE ──
+    async function deleteMachine(id) {
+        if (!confirm('למחוק מכונה זו?')) return;
+
+        try {
+            const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error(res.status);
+            await load();
+            showToast('✓ המכונה נמחקה', 'success');
+        } catch (err) {
+            showToast('שגיאה במחיקה: ' + err.message, 'error');
+        }
+    }
+
+    // ── TOAST ──
+    let toastTimer;
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.className = 'toast', 2800);
+    }
+
+    // ── INIT ──
+    load();
+</script>
+</body>
+</html>

@@ -3,14 +3,11 @@ package com.example.project_barbershop.model;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name="HairMachine")
+@Table(name="hair_machine")
 
 public class HairMachine implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -23,14 +20,14 @@ public class HairMachine implements Serializable {
     @Length(min = 3, max = 30)
     private String brand;
 
-    @Size(min = 3, max = 20)
+
     private String model;
 
     @Min(100)
     @Max(2000)
     private Double price;
 
-    @NotBlank
+    @NotNull
     private Boolean available;
 
     @Length(max = 500)
